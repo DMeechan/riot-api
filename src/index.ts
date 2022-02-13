@@ -1,16 +1,10 @@
-import {
-  RiotRateLimiter,
-  METHODS,
-  HOST,
-  PlatformId,
-} from "@fightmegg/riot-rate-limiter";
-import Bottleneck from "bottleneck";
-import Redis from "ioredis";
+import queryString from "query-string";
 import { compile } from "path-to-regexp";
-import qs from "querystring";
 import { RiotAPITypes } from "./@types";
-import { MemoryCache, RedisCache } from "./cache";
+import { MemoryCache } from "./cache";
 import { DDragon } from "./ddragon";
+import { HOST, METHODS, PlatformId } from "./riot-rate-limiter/@types";
+import { RiotRateLimiter } from "./riot-rate-limiter/index";
 
 const debugCache = require("debug")("riotapi:cache");
 
@@ -29,7 +23,7 @@ const getPath = (key: string): any => {
 export { RiotAPITypes, PlatformId, DDragon };
 
 export class RiotAPI {
-  readonly cache?: MemoryCache | RedisCache;
+  readonly cache?: MemoryCache;
 
   readonly riotRateLimiter: RiotRateLimiter;
 
@@ -50,16 +44,11 @@ export class RiotAPI {
     this.riotRateLimiter = new RiotRateLimiter({
       concurrency: 10,
       datastore: this.config.cache?.cacheType || "local",
-      redis: this.config.cache?.client as Bottleneck.RedisConnectionOptions,
     });
     this.ddragon = new DDragon();
 
     if (this.config.cache?.cacheType === "local")
       this.cache = new MemoryCache();
-    else if (this.config.cache?.cacheType === "ioredis")
-      this.cache = new RedisCache(
-        this.config.cache?.client as Redis.RedisOptions
-      );
   }
 
   private getHeaders(headers?: { [key: string]: string }) {
@@ -126,7 +115,7 @@ export class RiotAPI {
     const createPath = compile(path, { encode: encodeURIComponent });
 
     let url = `https://${createHost({ platformId })}${createPath(pathData)}`;
-    if (options?.params) url += `?${qs.encode(options.params)}`;
+    if (options?.params) url += `?${queryString.stringify(options.params)}`;
 
     const cacheValue = await this.checkCache<T>(methodKey, url);
     if (cacheValue) return cacheValue as T;
