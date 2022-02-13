@@ -1,10 +1,15 @@
+import {
+  RiotRateLimiter,
+  METHODS,
+  HOST,
+  PlatformId,
+} from "@fightmegg/riot-rate-limiter";
 import queryString from "query-string";
 import { compile } from "path-to-regexp";
+
 import { RiotAPITypes } from "./@types";
 import { MemoryCache } from "./cache";
 import { DDragon } from "./ddragon";
-import { HOST, METHODS, PlatformId } from "./riot-rate-limiter/@types";
-import { RiotRateLimiter } from "./riot-rate-limiter/index";
 
 const debugCache = require("debug")("riotapi:cache");
 

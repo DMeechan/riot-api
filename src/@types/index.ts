@@ -1,4 +1,4 @@
-import { PlatformId } from "../riot-rate-limiter/@types/index";
+import { PlatformId } from "@fightmegg/riot-rate-limiter";
 
 export namespace RiotAPITypes {
   export interface Config {
